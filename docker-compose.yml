@@ -1,0 +1,12 @@
+services:
+  chrome:
+    container_name: selenium
+    image: selenium/standalone-chrome-debug:3.141.59-vanadium
+    volumes:
+      - /dev/shm:/dev/shm
+    ports:
+      - "4444:4444"
+      - "5900:5900"
+
+  bot:
+    image: node:16-alpine3.11
