@@ -1,0 +1,19 @@
+{
+  "name": "zalando",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Kuba Karmiński <jlkarminski@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@wdio/cli": "^7.5.3",
+    "@wdio/devtools-service": "^7.5.3",
+    "webdriverio": "^7.5.3"
+  },
+  "devDependencies": {
+    "@wdio/local-runner": "^7.5.4",
+    "@wdio/mocha-framework": "^7.5.3",
+    "@wdio/spec-reporter": "^7.5.3",
+    "chromedriver": "^90.0.0",
+    "wdio-chromedriver-service": "^7.0.0"
+  }
+}
