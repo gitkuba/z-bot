@@ -10,4 +10,13 @@ services:
 
   node:
     image: node:16-alpine3.11
-
+    environment:
+      SELENIUM_SERVER_HOST: selenium
+      SELENIUM_SERVER_PATH: /wd/hub
+      USER: kuba
+    depends_on:
+      - selenium
+    command: node index.js
+    volumes:
+      - .:/app
+    working_dir: /app

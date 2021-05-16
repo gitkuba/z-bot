@@ -3,15 +3,14 @@ const fs = require('fs');
 
 const MAIN_URL = "https://www.zalando-lounge.pl";
 const PATH_LOGIN = "/#/login";
-const LOGIN = process.env.LOGIN;
-const PASS = process.env.PASS;
 const USER = process.env.USER;
-const HOST = process.env.HOST || null;
-
+const SELENIUM_SERVER_HOST = process.env.SELENIUM_SERVER_HOST || null;
+const SELENIUM_SERVER_PATH = process.env.SELENIUM_SERVER_PATH || null;
 
 ;(async () => {
     const browser = await remote({
-        hostname: HOST,
+        hostname: SELENIUM_SERVER_HOST,
+        path: SELENIUM_SERVER_PATH,
         capabilities: {
             browserName: 'chrome',
             'goog:chromeOptions': {
@@ -25,7 +24,7 @@ const HOST = process.env.HOST || null;
     await Login.restoreCookies(browser);
     await browser.url(MAIN_URL);
     await Page.closeCookiesPolicyModal(browser);
-    await Login.logIn(browser);
+    await Login.logIn(browser, userConfig);
 
 
     // const categoryButton = await browser.$('h2[text=Infolinia]')
@@ -144,12 +143,12 @@ class Nav {
 }
 
 class Login {
-    static async logIn(browser) {
+    static async logIn(browser, userConfig) {
         if (!await (await Nav.accountIcon(browser)).isDisplayed()) {
             await browser.url(getUrl(PATH_LOGIN))
             await browser.pause(3000)
-            await (await Login.eMailInput(browser)).setValue(LOGIN)
-            await (await Login.passInput(browser)).setValue(PASS)
+            await (await Login.eMailInput(browser)).setValue(userConfig.login)
+            await (await Login.passInput(browser)).setValue(userConfig.pass)
             await (await Login.continueButton(browser)).click()
             await browser.pause(3000)
             await Login.saveCookies(browser);
