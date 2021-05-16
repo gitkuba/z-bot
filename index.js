@@ -6,10 +6,12 @@ const PATH_LOGIN = "/#/login";
 const LOGIN = process.env.LOGIN;
 const PASS = process.env.PASS;
 const USER = process.env.USER;
+const HOST = process.env.HOST || null;
 
 
 ;(async () => {
     const browser = await remote({
+        hostname: HOST,
         capabilities: {
             browserName: 'chrome',
             'goog:chromeOptions': {

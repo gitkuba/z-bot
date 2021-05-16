@@ -2,3 +2,4 @@ yarn-error.log
 .idea/
 storage.json
 screenshots/
+node_modules/

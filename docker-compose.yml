@@ -1,5 +1,5 @@
 services:
-  chrome:
+  selenium:
     container_name: selenium
     image: selenium/standalone-chrome-debug:3.141.59-vanadium
     volumes:
@@ -8,5 +8,6 @@ services:
       - "4444:4444"
       - "5900:5900"
 
-  bot:
+  node:
     image: node:16-alpine3.11
+
