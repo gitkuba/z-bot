@@ -1,13 +1,9 @@
 const {remote} = require('webdriverio');
 const fs = require('fs');
+const axios = require('axios')
+const queue = require('./queue')
 
-const MAIN_URL = "https://www.zalando-lounge.pl";
-const PATH_LOGIN = "/#/login";
-const USER = process.env.USER;
-const SELENIUM_SERVER_HOST = process.env.SELENIUM_SERVER_HOST || null;
-const SELENIUM_SERVER_PATH = process.env.SELENIUM_SERVER_PATH || null;
-
-;(async () => {
+(async () => {
     const browser = await remote({
         hostname: SELENIUM_SERVER_HOST,
         path: SELENIUM_SERVER_PATH,
@@ -19,19 +15,12 @@ const SELENIUM_SERVER_PATH = process.env.SELENIUM_SERVER_PATH || null;
         }
     })
 
-    const userConfig = Storage.read(`user-${USER}`)
+    const users = Storage.read('users', 'users')
 
     await Login.restoreCookies(browser);
     await browser.url(MAIN_URL);
     await Page.closeCookiesPolicyModal(browser);
     await Login.logIn(browser, userConfig);
-
-
-    // const categoryButton = await browser.$('h2[text=Infolinia]')
-    // console.log('categoryButton', await categoryButton.isDisplayedInViewport())
-    // await browser.execute('window.scroll(0, 90000)')
-    // await browser.pause(20000)
-    // console.log('categoryButton', await categoryButton.isDisplayedInViewport())
 
     const openCampaigns = []
     const openCampaignsElements = await browser.$$('#campaigns-open div a');
@@ -46,12 +35,13 @@ const SELENIUM_SERVER_PATH = process.env.SELENIUM_SERVER_PATH || null;
     for (let campaignUrl of openCampaigns) {
         await browser.url(getUrl(campaignUrl))
         await CampaignPage.scrollToBottom(browser)
-        await CampaignPage.scanOffers(browser, userConfig)
+        for (let userConfig in users) {
+            await CampaignPage.scanOffers(browser, userConfig)
+        }
     }
 
-    await browser.freeze();
     await browser.deleteSession()
-})()
+})();
 
 const getUrl = (path) => {
     return MAIN_URL + path;
@@ -106,10 +96,15 @@ class CampaignPage extends Page {
             }
         }
 
-        for (let articlePath of articlesToBeReserved) {
-            await browser.url(getUrl(articlePath));
-            await ArticlePage.makeReservation(browser, userConfig);
-        }
+        queue.push({userConfig, articlesToBeReserved})
+
+        // for (let articlePath of articlesToBeReserved) {
+        //     const articleURL = getUrl(articlePath);
+        //     await browser.url(articleURL);
+        //     await ArticlePage.makeReservation(browser, userConfig);
+        //     await Slack.send(`Hay @${userConfig['slack-name']}, ` +
+        //         `I've added something to your cart. Check it out 👉🏻 ${articleURL}.`)
+        // }
     }
 }
 
@@ -121,17 +116,20 @@ class ArticlePage extends Page {
         try {
             const sizeButton = await browser.$('span=M');
             await sizeButton.click()
-        } catch (e) {}
+        } catch (e) {
+        }
 
         try {
             const sizeButton = await browser.$('span=46');
             await sizeButton.click()
-        } catch (e) {}
+        } catch (e) {
+        }
 
         try {
             const addToBasket = await browser.$('span=Do koszyka')
             await addToBasket.click()
-        } catch (e) {}
+        } catch (e) {
+        }
 
     }
 }
@@ -185,14 +183,27 @@ class Footer {
 }
 
 class Storage {
-    static read(key) {
-        const storage = JSON.parse(fs.readFileSync('storage.json'));
+    static read(file, key) {
+        const storage = JSON.parse(fs.readFileSync(`storage/${file}.json`));
         return storage[key]
     }
 
-    static write(key, value) {
-        let storage = JSON.parse(fs.readFileSync('storage.json'));
+    static write(file, key, value) {
+        let storage = JSON.parse(fs.readFileSync(`storage/${file}.json`));
         storage = {...storage, [key]: value}
-        fs.writeFileSync('storage.json', JSON.stringify(storage));
+        fs.writeFileSync('users.json', JSON.stringify(storage));
+    }
+}
+
+class Slack {
+    static async send(text) {
+        await axios
+            .post('https://hooks.slack.com/services/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', {
+                text
+            })
+            .then(res => {
+                console.log(`statusCode: ${res.statusCode}`)
+                console.log(res)
+            })
     }
 }

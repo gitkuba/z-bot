@@ -8,15 +8,40 @@ services:
       - "4444:4444"
       - "5900:5900"
 
-  node:
+  selenium2:
+    container_name: selenium2
+    image: selenium/standalone-chrome-debug:3.141.59-vanadium
+    volumes:
+      - /dev/shm:/dev/shm
+    ports:
+      - "4444:4445"
+      - "5900:5901"
+
+  crawler:
     image: node:16-alpine3.11
     environment:
       SELENIUM_SERVER_HOST: selenium
       SELENIUM_SERVER_PATH: /wd/hub
-      USER: kuba
     depends_on:
       - selenium
-    command: node index.js
+    command: node src/crawler.js
     volumes:
       - .:/app
     working_dir: /app
+
+  worker:
+    image: node:16-alpine3.11
+    environment:
+      SELENIUM_SERVER_HOST: selenium
+      SELENIUM_SERVER_PATH: /wd/hub
+      depends_on:
+        - selenium
+      command: node src/worker.js.js
+      volumes:
+        - .:/app
+      working_dir: /app
+
+  redis:
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"

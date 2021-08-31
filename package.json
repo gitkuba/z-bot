@@ -1,12 +1,14 @@
 {
   "name": "zalando",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/crawler.js",
   "author": "Kuba Karmiński <jlkarminski@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "@wdio/cli": "^7.5.3",
     "@wdio/devtools-service": "^7.5.3",
+    "axios": "^0.21.1",
+    "node-redis": "^0.1.7",
     "webdriverio": "^7.5.3"
   },
   "devDependencies": {

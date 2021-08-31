@@ -1,5 +1,6 @@
 yarn-error.log
 .idea/
-storage.json
+storage/users.json
 screenshots/
 node_modules/
+storage/*.json
